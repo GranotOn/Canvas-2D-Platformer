@@ -34,6 +34,7 @@ class Scene {
 
   onKeyDown(e) {
     this.player.onKeyDown(e);
+    if (e.code === "F9") this.debug = !this.debug;
   }
 
   onKeyUp(e) {

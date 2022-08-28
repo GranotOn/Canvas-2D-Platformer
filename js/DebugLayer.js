@@ -3,7 +3,11 @@ export default class DebugLayer {
 
   draw(ctx, nEntities, drawTime, sx, sy) {
     const x = sx + 10;
-    const drawList = [`Entities: ${nEntities}`, `Draw Time: ${drawTime} ms`];
+    const drawList = [
+      `Entities: ${nEntities}`,
+      `Draw Time: ${drawTime} ms`,
+      `Close Debug: F9`,
+    ];
     ctx.font = "30px Arial";
     ctx.fillStyle = "#ffffff";
     drawList.forEach((item, i) => {
