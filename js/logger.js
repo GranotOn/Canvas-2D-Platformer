@@ -1,13 +1,11 @@
 export const Colors = {
   black: "black",
+  white: "white",
   red: "#a8323e",
   green: "#32a852",
   yellow: "#d2e312",
+  grey: "#484a48",
 };
-
-function log(text, color = Colors.black) {
-  console.log(`%c${time}: ${text}`, `color:${color}`);
-}
 
 export class Logger {
   constructor(entity) {
@@ -17,28 +15,39 @@ export class Logger {
   _getTime() {
     return new Date().toLocaleTimeString();
   }
-  log(text, color = Colors.black) {
+  log(text, color = Colors.white) {
     const time = this._getTime();
     console.log(`%c[${this.entity}] (${time}): ${text}`, `color:${color}`);
+  }
+
+  info(text) {
+    const time = this._getTime();
+    console.log(
+      `%c[${this.entity}] (${time}) {INFO}: ${text}`,
+      `color:${Colors.grey}`
+    );
   }
 
   warn(text) {
     const time = this._getTime();
     console.log(
-      `%c[${this.entity}] (${time}): ${text}`,
+      `%c[${this.entity}] (${time}) {WARN}: ${text}`,
       `color:${Colors.yellow}`
     );
   }
 
   error(text) {
     const time = this._getTime();
-    console.log(`%c[${this.entity}] (${time}): ${text}`, `color:${Colors.red}`);
+    console.log(
+      `%c[${this.entity}] (${time}) {ERROR}: ${text}`,
+      `color:${Colors.red}`
+    );
   }
 
   success(text) {
     const time = this._getTime();
     console.log(
-      `%c[${this.entity}] (${time}): ${text}`,
+      `%c[${this.entity}] (${time}) {SUCCESS}: ${text}`,
       `color:${Colors.green}`
     );
   }
