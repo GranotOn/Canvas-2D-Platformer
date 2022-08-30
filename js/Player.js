@@ -17,9 +17,9 @@ export class Player {
     this.velocityX = velocityX;
     this.velocityY = velocityY;
     this.face = face;
-    this.width = 150;
+    this.width = 100;
     this.boundingColor = "#e41f1f";
-    this.height = 150;
+    this.height = 120;
     this.boundingBox = new BoundingBox(x, y, this.width, this.height);
     this.logger = new Logger("Player");
   }
