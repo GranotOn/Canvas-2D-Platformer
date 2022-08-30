@@ -6,7 +6,7 @@
     "spriteFile": "BlueSnailSprite.png",
     "frameTime": 10,
     "width": 50,
-    "height": 43,
+    "height": 47,
     "states": {
       "idle": {
         "row": 0,
