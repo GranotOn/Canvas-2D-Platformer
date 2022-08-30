@@ -1,0 +1,29 @@
+{
+  "id": 0,
+  "name": "Blue Snail",
+  "hp": 20,
+  "spriteOptions": {
+    "spriteFile": "BlueSnailSprite.png",
+    "frameTime": 10,
+    "width": 50,
+    "height": 43,
+    "states": {
+      "idle": {
+        "row": 0,
+        "cols": 1
+      },
+      "walk": {
+        "row": 1,
+        "cols": 4
+      },
+      "hit": {
+        "row": 2,
+        "cols": 1
+      },
+      "dead": {
+        "row": 3,
+        "cols": 3
+      }
+    }
+  }
+}

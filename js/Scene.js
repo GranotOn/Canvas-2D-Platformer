@@ -3,6 +3,9 @@ import { Logger } from "./logger.js";
 import { Player } from "./Player.js";
 import FlyingBoxOfDeath from "./FlyingBoxOfDeath.js";
 import DebugLayer from "./DebugLayer.js";
+import SpriteAnimation from "./SpriteAnimation.js";
+import BlueSnail from "./EnemyMobs/BlueSnail/BlueSnail.js";
+import SpriteAnimationManager from "./SpriteAnimation.js";
 
 class Scene {
   constructor(
@@ -25,6 +28,7 @@ class Scene {
     this.debug = debug;
     this.entities = entities;
     this.debugLayer = new DebugLayer();
+    this.spriteMap = new Map();
   }
 
   onTick(delta) {
@@ -35,6 +39,14 @@ class Scene {
   onKeyDown(e) {
     this.player.onKeyDown(e);
     if (e.code === "F9") this.debug = !this.debug;
+  }
+
+  getSpriteAnimation(id, spriteFile, opts) {
+    if (!this.spriteMap.has(id)) {
+      this.spriteMap.set(id, new Img(spriteFile, "Assets/Sprites/"));
+    }
+
+    return new SpriteAnimationManager(this.spriteMap.get(id), opts);
   }
 
   onKeyUp(e) {
@@ -109,15 +121,15 @@ class DevScene extends Scene {
     const bg = Img("BG.png");
     const player = new Player(null, 50, 50, 700, 50);
     const enemies = [
-      new FlyingBoxOfDeath(100, 100),
-      new FlyingBoxOfDeath(300, 200),
-      new FlyingBoxOfDeath(500, 200),
+      new BlueSnail(100, 100, 1),
+      new BlueSnail(180, 100, -1),
+      new BlueSnail(250, 100, 1),
     ];
     super(canvas, ctx, bg, player, enemies, 600, 600, true);
+
     player.setScene(this);
+    enemies.forEach((enemy) => enemy.setScene(this));
   }
 }
-
-const sceneContext = {};
 
 export { DevScene };
