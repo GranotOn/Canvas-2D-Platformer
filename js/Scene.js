@@ -1,11 +1,12 @@
 import Img from "./Img.js";
 import { Logger } from "./logger.js";
 import { Player } from "./Player.js";
-import FlyingBoxOfDeath from "./FlyingBoxOfDeath.js";
 import DebugLayer from "./DebugLayer.js";
-import SpriteAnimation from "./SpriteAnimation.js";
 import BlueSnail from "./EnemyMobs/BlueSnail/BlueSnail.js";
+import RedSnail from "./EnemyMobs/RedSnail/RedSnail.js";
 import SpriteAnimationManager from "./SpriteAnimation.js";
+import mobTypes from "./entityTypes.json" assert { type: "json" };
+import { guid } from "./utils.js";
 
 class Scene {
   constructor(
@@ -13,7 +14,6 @@ class Scene {
     ctx,
     bg,
     player,
-    entities,
     cameraWidth = 600,
     cameraHeight = 600,
     debug = false
@@ -26,7 +26,7 @@ class Scene {
     this.cameraHeight = cameraHeight;
     this.logger = new Logger("Scene.js");
     this.debug = debug;
-    this.entities = entities;
+    this.entities = [];
     this.debugLayer = new DebugLayer();
     this.spriteMap = new Map();
   }
@@ -45,7 +45,6 @@ class Scene {
     if (!this.spriteMap.has(id)) {
       this.spriteMap.set(id, new Img(spriteFile, "Assets/Sprites/"));
     }
-
     return new SpriteAnimationManager(this.spriteMap.get(id), opts);
   }
 
@@ -54,16 +53,61 @@ class Scene {
   }
 
   addEntity(ent) {
+    ent.setId(guid());
     this.entities.push(ent);
   }
 
   removeEntity(ent) {
-    this.entities = this.entities.filter((e) => e !== ent);
+    if (ent.type === mobTypes.enemy) {
+      console.log(
+        ent.id,
+        this.entities.map((e) => e.id),
+        this.entities.filter((e) => e.id !== ent.id).map((e) => e.id)
+      );
+    }
+    this.entities = this.entities.filter((e) => e.id !== ent.id);
+  }
+
+  getKEnemiesInRange(k, range, direction) {
+    if (k === 0) return [];
+    // direction -> 0 = every direction, -1 = -x, 1 = x
+    const playerX = this.player.x;
+    const playerY = this.player.y;
+
+    const getDist = (x1, y1, x2, y2) =>
+      Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+
+    console.log(this.entities.map((e) => e.id));
+    const kEnemiesInRange = this.entities.filter((ent) => {
+      const { x, y, state, type } = ent;
+      const shouldIgnore =
+        (direction === 1 && x < playerX) ||
+        (direction === -1 && x > playerX) ||
+        type !== mobTypes.enemy ||
+        state === "dead";
+
+      const dist = getDist(playerX, playerY, x, y);
+      if (!shouldIgnore && dist <= range && k > 0) {
+        console.log(ent.id);
+        --k;
+        return true;
+      }
+
+      return false;
+    });
+
+    return kEnemiesInRange.sort(
+      (a, b) =>
+        getDist(playerX, playerY, a.x, a.y) >
+        getDist(playerX, playerY, b.x, b.y)
+    );
   }
 
   #update(delta) {
     // Check for collisions
-    const entities = this.entities.concat(this.player);
+    const entities = this.entities
+      .concat(this.player)
+      .filter((ent) => ent.boundingBox !== null);
     entities.forEach((entity, i) => {
       const collisions = [];
       entities.forEach((otherEntity, j) => {
@@ -124,8 +168,10 @@ class DevScene extends Scene {
       new BlueSnail(100, 100, 1),
       new BlueSnail(180, 100, -1),
       new BlueSnail(250, 100, 1),
+      new RedSnail(250, 200, 1),
     ];
-    super(canvas, ctx, bg, player, enemies, 600, 600, true);
+    super(canvas, ctx, bg, player, 600, 600, true);
+    enemies.forEach((enemy) => super.addEntity(enemy));
 
     player.setScene(this);
     enemies.forEach((enemy) => enemy.setScene(this));

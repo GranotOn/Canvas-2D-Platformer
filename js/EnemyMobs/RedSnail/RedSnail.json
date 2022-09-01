@@ -1,21 +1,21 @@
 {
-  "id": 0,
-  "name": "Blue Snail",
-  "hp": 20,
+  "id": 1,
+  "name": "RedSnail",
+  "hp": 25,
   "minimumDamageThreshold": 2,
   "spriteOptions": {
-    "spriteFile": "BlueSnailSprite.png",
+    "spriteFile": "RedSnailSprite.png",
     "frameTime": 15,
-    "width": 53,
-    "height": 47,
+    "width": 50,
+    "height": 45,
     "states": {
       "idle": {
         "row": 0,
-        "cols": 1
+        "cols": 3
       },
       "walk": {
         "row": 1,
-        "cols": 4
+        "cols": 3
       },
       "hit": {
         "row": 2,

@@ -1,4 +1,4 @@
-import BlueSnailConfig from "./BlueSnail.json" assert { type: "json" };
+import Config from "./RedSnail.json" assert { type: "json" };
 import mobTypes from "../../entityTypes.json" assert { type: "json" };
 import BoundingBox from "../../BoundingBox.js";
 
@@ -8,11 +8,11 @@ export default class BlueSnail {
     this.scene = null;
     this.x = x;
     this.y = y;
-    this.width = BlueSnailConfig.spriteOptions.width;
-    this.height = BlueSnailConfig.spriteOptions.height;
-    this.frameTime = BlueSnailConfig.spriteOptions.frameTime;
-    this.frameTimeDefault = BlueSnailConfig.spriteOptions.frameTime;
-    this.hp = BlueSnailConfig.hp;
+    this.width = Config.spriteOptions.width;
+    this.height = Config.spriteOptions.height;
+    this.frameTime = Config.spriteOptions.frameTime;
+    this.frameTimeDefault = Config.spriteOptions.frameTime;
+    this.hp = Config.hp;
     this.state = "walk";
     this.face = face;
     this.boundingBox = new BoundingBox(x, y, this.width, this.height);
@@ -22,10 +22,14 @@ export default class BlueSnail {
   setScene(scene) {
     this.scene = scene;
     this.spriteAnimation = scene.getSpriteAnimation(
-      BlueSnailConfig.id,
-      BlueSnailConfig.spriteOptions.spriteFile,
-      BlueSnailConfig.spriteOptions
+      Config.id,
+      Config.spriteOptions.spriteFile,
+      Config.spriteOptions
     );
+  }
+
+  setId(id) {
+    this.id = id;
   }
 
   onDead() {
@@ -39,7 +43,7 @@ export default class BlueSnail {
         if (ent.type === mobTypes.playerAttack) {
           const [min, max] = ent.damageRange;
           const damage = Math.floor(Math.random() * (max - min) + min);
-          if (damage <= BlueSnailConfig.minimumDamageThreshold) {
+          if (damage <= Config.minimumDamageThreshold) {
             // miss;
           } else if (this.hp > 0) {
             // hit;
@@ -54,10 +58,6 @@ export default class BlueSnail {
     } else {
       this.debugColor = "#e00000";
     }
-  }
-
-  setId(id) {
-    this.id = id;
   }
 
   draw(ctx, debugMode) {
