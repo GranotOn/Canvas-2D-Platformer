@@ -1,6 +1,7 @@
 import BoundingBox from "./BoundingBox.js";
 import { Logger } from "./logger.js";
 import Shuriken from "./Shuriken.js";
+import mobTypes from "./entityTypes.json" assert { type: "json" };
 
 export class Player {
   constructor(
@@ -14,6 +15,7 @@ export class Player {
     this.scene = scene;
     this.x = x;
     this.y = y;
+    this.type = mobTypes.player;
     this.velocityX = velocityX;
     this.velocityY = velocityY;
     this.face = face;
@@ -22,6 +24,7 @@ export class Player {
     this.height = 120;
     this.boundingBox = new BoundingBox(x, y, this.width, this.height);
     this.logger = new Logger("Player");
+    this.cooldown = false;
   }
 
   setScene(scene) {
@@ -33,11 +36,29 @@ export class Player {
     else this.boundingColor = "#ff0000";
   }
 
+  #initCooldown(cooldown = 1000) {
+    this.cooldown = true;
+    const disableCooldown = () => (this.cooldown = false);
+    setTimeout(disableCooldown, cooldown);
+  }
+
   #emitShuriken() {
+    if (this.cooldown === true) return;
+    this.#initCooldown();
+
+    const enemies = this.scene.getKEnemiesInRange(1, 400, this.face);
+
     var x = this.face === 1 ? this.width + 10 : -15;
     x += this.x;
     this.scene.addEntity(
-      new Shuriken(this.scene, this.face, 0, x, this.y + this.height / 2)
+      new Shuriken(
+        this.scene,
+        x,
+        this.y + this.height / 2,
+        this.face,
+        enemies,
+        [20, 30]
+      )
     );
   }
 

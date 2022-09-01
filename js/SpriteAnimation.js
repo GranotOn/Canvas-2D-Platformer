@@ -1,14 +1,22 @@
-import img from "./Img.js";
-
 class SpriteAnimation {
   constructor({ row, cols }) {
     this.row = row;
     this.cols = cols;
     this.frame = 0;
+    this.isOverOnce = false;
   }
 
   updateFrame() {
-    this.frame = this.frame === this.cols - 1 ? 0 : this.frame + 1;
+    if (this.frame === this.cols - 1) {
+      this.frame = 0;
+      this.isOverOnce = true;
+    } else {
+      this.frame = this.frame + 1;
+    }
+  }
+
+  isAnimationOverOnce() {
+    return this.isOverOnce;
   }
 
   getFrame(spriteWidth, spriteHeight) {
@@ -36,6 +44,10 @@ export default class SpriteAnimationManager {
     Object.entries(opts.states).forEach((state) => {
       this.spriteAnimations.set(state[0], new SpriteAnimation(state[1]));
     });
+  }
+
+  isAnimationOverOnce(state) {
+    return this.spriteAnimations.get(state).isAnimationOverOnce();
   }
 
   drawFrame(ctx, state, x, y, frameShouldUpdate = false, face = 1) {
