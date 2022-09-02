@@ -57,7 +57,7 @@ export class Player {
         this.y + this.height / 2,
         this.face,
         enemies,
-        [20, 30]
+        [2, 6]
       )
     );
   }

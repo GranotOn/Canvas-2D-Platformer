@@ -58,13 +58,6 @@ class Scene {
   }
 
   removeEntity(ent) {
-    if (ent.type === mobTypes.enemy) {
-      console.log(
-        ent.id,
-        this.entities.map((e) => e.id),
-        this.entities.filter((e) => e.id !== ent.id).map((e) => e.id)
-      );
-    }
     this.entities = this.entities.filter((e) => e.id !== ent.id);
   }
 
@@ -77,7 +70,6 @@ class Scene {
     const getDist = (x1, y1, x2, y2) =>
       Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 
-    console.log(this.entities.map((e) => e.id));
     const kEnemiesInRange = this.entities.filter((ent) => {
       const { x, y, state, type } = ent;
       const shouldIgnore =
@@ -88,7 +80,6 @@ class Scene {
 
       const dist = getDist(playerX, playerY, x, y);
       if (!shouldIgnore && dist <= range && k > 0) {
-        console.log(ent.id);
         --k;
         return true;
       }
@@ -109,7 +100,7 @@ class Scene {
       .concat(this.player)
       .filter((ent) => ent.boundingBox !== null);
     entities.forEach((entity, i) => {
-      const collisions = [];
+      let collisions = [];
       entities.forEach((otherEntity, j) => {
         if (i !== j && entity.boundingBox.isColliding(otherEntity))
           collisions.push(otherEntity);

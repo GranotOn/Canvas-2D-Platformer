@@ -1,8 +1,9 @@
 import Config from "./RedSnail.json" assert { type: "json" };
 import mobTypes from "../../entityTypes.json" assert { type: "json" };
 import BoundingBox from "../../BoundingBox.js";
+import HitUI from "../../HitUI.js";
 
-export default class BlueSnail {
+export default class RedSnail {
   constructor(x, y, face = 1) {
     this.type = mobTypes.enemy;
     this.scene = null;
@@ -15,6 +16,7 @@ export default class BlueSnail {
     this.hp = Config.hp;
     this.state = "walk";
     this.face = face;
+    this.hitQueue = [];
     this.boundingBox = new BoundingBox(x, y, this.width, this.height);
     this.debugColor = "#e00000";
   }
@@ -37,6 +39,13 @@ export default class BlueSnail {
     this.boundingBox = null;
   }
 
+  addDamageUI(damage) {
+    const lifeTime = 2000;
+    this.hitQueue.push(new HitUI(damage, this.y - this.hitQueue.length * 30));
+    const dequeueHit = () => this.hitQueue.shift();
+    setTimeout(dequeueHit, lifeTime);
+  }
+
   update(delta, collisions) {
     if (collisions.length > 0) {
       collisions.forEach((ent) => {
@@ -44,9 +53,11 @@ export default class BlueSnail {
           const [min, max] = ent.damageRange;
           const damage = Math.floor(Math.random() * (max - min) + min);
           if (damage <= Config.minimumDamageThreshold) {
+            this.addDamageUI(0);
             // miss;
           } else if (this.hp > 0) {
             // hit;
+            this.addDamageUI(damage);
             this.hp -= damage;
             if (this.hp <= 0) {
               this.onDead();
@@ -83,6 +94,10 @@ export default class BlueSnail {
       this.y,
       frameShouldUpdateFlag,
       this.face
+    );
+
+    this.hitQueue.forEach((hitObject, idx) =>
+      hitObject.draw(ctx, this.x + this.width / 2)
     );
 
     if (debugMode) {

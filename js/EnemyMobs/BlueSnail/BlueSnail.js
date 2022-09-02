@@ -1,6 +1,7 @@
-import BlueSnailConfig from "./BlueSnail.json" assert { type: "json" };
+import Config from "./BlueSnail.json" assert { type: "json" };
 import mobTypes from "../../entityTypes.json" assert { type: "json" };
 import BoundingBox from "../../BoundingBox.js";
+import HitUI from "../../HitUI.js";
 
 export default class BlueSnail {
   constructor(x, y, face = 1) {
@@ -8,13 +9,14 @@ export default class BlueSnail {
     this.scene = null;
     this.x = x;
     this.y = y;
-    this.width = BlueSnailConfig.spriteOptions.width;
-    this.height = BlueSnailConfig.spriteOptions.height;
-    this.frameTime = BlueSnailConfig.spriteOptions.frameTime;
-    this.frameTimeDefault = BlueSnailConfig.spriteOptions.frameTime;
-    this.hp = BlueSnailConfig.hp;
+    this.width = Config.spriteOptions.width;
+    this.height = Config.spriteOptions.height;
+    this.frameTime = Config.spriteOptions.frameTime;
+    this.frameTimeDefault = Config.spriteOptions.frameTime;
+    this.hp = Config.hp;
     this.state = "walk";
     this.face = face;
+    this.hitQueue = [];
     this.boundingBox = new BoundingBox(x, y, this.width, this.height);
     this.debugColor = "#e00000";
   }
@@ -22,9 +24,9 @@ export default class BlueSnail {
   setScene(scene) {
     this.scene = scene;
     this.spriteAnimation = scene.getSpriteAnimation(
-      BlueSnailConfig.id,
-      BlueSnailConfig.spriteOptions.spriteFile,
-      BlueSnailConfig.spriteOptions
+      Config.id,
+      Config.spriteOptions.spriteFile,
+      Config.spriteOptions
     );
   }
 
@@ -33,16 +35,25 @@ export default class BlueSnail {
     this.boundingBox = null;
   }
 
+  addDamageUI(damage) {
+    const lifeTime = 2000;
+    this.hitQueue.push(new HitUI(damage, this.y - this.hitQueue.length * 30));
+    const dequeueHit = () => this.hitQueue.shift();
+    setTimeout(dequeueHit, lifeTime);
+  }
+
   update(delta, collisions) {
     if (collisions.length > 0) {
       collisions.forEach((ent) => {
         if (ent.type === mobTypes.playerAttack) {
           const [min, max] = ent.damageRange;
           const damage = Math.floor(Math.random() * (max - min) + min);
-          if (damage <= BlueSnailConfig.minimumDamageThreshold) {
+          if (damage <= Config.minimumDamageThreshold) {
+            this.addDamageUI(0);
             // miss;
           } else if (this.hp > 0) {
             // hit;
+            this.addDamageUI(damage);
             this.hp -= damage;
             if (this.hp <= 0) {
               this.onDead();
@@ -83,6 +94,10 @@ export default class BlueSnail {
       this.y,
       frameShouldUpdateFlag,
       this.face
+    );
+
+    this.hitQueue.forEach((hitObject, idx) =>
+      hitObject.draw(ctx, this.x + this.width / 2)
     );
 
     if (debugMode) {
