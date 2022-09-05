@@ -1,6 +1,5 @@
 import BoundingBox from "./BoundingBox.js";
-import mobTypes from "./entityTypes.json" assert { type: "json" };
-
+import mobTypes from "/Configs/entityTypes.js";
 export default class Shuriken {
   constructor(scene, x, y, face, enemies, damageRange, lifetime = 40) {
     this.type = mobTypes.playerAttack;

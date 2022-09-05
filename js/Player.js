@@ -1,8 +1,7 @@
 import BoundingBox from "./BoundingBox.js";
 import { Logger } from "./logger.js";
 import Shuriken from "./Shuriken.js";
-import mobTypes from "./entityTypes.json" assert { type: "json" };
-
+import mobTypes from "/Configs/entityTypes.js";
 export class Player {
   constructor(
     scene = null,
