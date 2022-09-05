@@ -1,8 +1,8 @@
-import Config from "./BlueSnail.json" assert { type: "json" };
-import mobTypes from "../../entityTypes.json" assert { type: "json" };
 import BoundingBox from "../../BoundingBox.js";
 import HitUI from "../../HitUI.js";
 
+import Config from "/Configs/BlueSnail.js";
+import mobTypes from "/Configs/entityTypes.js";
 export default class BlueSnail {
   constructor(x, y, face = 1) {
     this.type = mobTypes.enemy;

@@ -5,9 +5,8 @@ import DebugLayer from "./DebugLayer.js";
 import BlueSnail from "./EnemyMobs/BlueSnail/BlueSnail.js";
 import RedSnail from "./EnemyMobs/RedSnail/RedSnail.js";
 import SpriteAnimationManager from "./SpriteAnimation.js";
-import mobTypes from "./entityTypes.json" assert { type: "json" };
 import { guid } from "./utils.js";
-
+import mobTypes from "/Configs/entityTypes.js";
 class Scene {
   constructor(
     canvas,
