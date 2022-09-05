@@ -37,9 +37,10 @@ function initGame() {
   logger.log("Init");
 
   canvas = document.createElement("canvas");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  document.body.append(canvas);
+  const wrapper = document.getElementById("wrapper");
+  canvas.width = wrapper.offsetWidth;
+  canvas.height = wrapper.offsetHeight;
+  wrapper.append(canvas);
   ctx = canvas.getContext("2d");
 
   logger.log("Creating Scene");

@@ -1,12 +1,15 @@
 import BoundingBox from "./BoundingBox.js";
 import { Logger } from "./logger.js";
 import Shuriken from "./Shuriken.js";
+import jumpState from "../Configs/jumpStates.js";
 import mobTypes from "/Configs/entityTypes.js";
+import gravity from "../Configs/gravity.js";
+
 export class Player {
   constructor(
     scene = null,
     velocityX = 50,
-    velocityY = 50,
+    velocityY = 5,
     x = 0,
     y = 0,
     face = 1
@@ -14,7 +17,9 @@ export class Player {
     this.scene = scene;
     this.x = x;
     this.y = y;
+    this.formerY = y;
     this.type = mobTypes.player;
+    this.jump = jumpState.notJumping;
     this.velocityX = velocityX;
     this.velocityY = velocityY;
     this.face = face;
@@ -24,6 +29,9 @@ export class Player {
     this.boundingBox = new BoundingBox(x, y, this.width, this.height);
     this.logger = new Logger("Player");
     this.cooldown = false;
+    this.jumpLimit = 100;
+    this.gravity = gravity;
+    this.gravitySpeed = 0;
   }
 
   setScene(scene) {
@@ -61,6 +69,13 @@ export class Player {
     );
   }
 
+  #handleJump() {
+    if (this.jump === jumpState.notJumping) {
+      this.jump = jumpState.goingUp;
+      this.formerY = this.y;
+    }
+  }
+
   update(delta, collisions = []) {
     this.#handleCollisions(collisions);
 
@@ -74,19 +89,27 @@ export class Player {
 
     if (this.rightPressed) {
       this.x = Math.min(this.x + this.velocityX / delta, window.innerWidth);
+      this.face = 1;
       onNotIdle();
     }
+
     if (this.leftPressed) {
       this.x = Math.max(this.x - this.velocityX / delta, 0);
+      this.face = -1;
       onNotIdle();
     }
-    if (this.upPressed) {
-      this.y = Math.max(this.y - this.velocityY / delta, 0);
-      onNotIdle();
+
+    if (this.jump === jumpState.goingUp) {
+      this.gravitySpeed += this.gravity;
+      this.y -= this.velocityY + this.gravitySpeed;
+
+      if (this.y <= this.formerY - this.jumpLimit) {
+        this.jump = jumpState.goingDown;
+      }
     }
-    if (this.downPressed) {
-      this.y = Math.min(this.y + this.velocityY / delta, window.innerHeight);
-      onNotIdle();
+
+    if (this.spacePressed) {
+      this.#handleJump();
     }
 
     if (idleFlag) {
@@ -103,17 +126,9 @@ export class Player {
     switch (e.code) {
       case "ArrowRight":
         this.rightPressed = true;
-        this.face = 1;
         break;
       case "ArrowLeft":
         this.leftPressed = true;
-        this.face = -1;
-        break;
-      case "ArrowUp":
-        this.upPressed = true;
-        break;
-      case "ArrowDown":
-        this.downPressed = true;
         break;
       case "Space":
         this.spacePressed = true;
@@ -130,12 +145,6 @@ export class Player {
         break;
       case "ArrowLeft":
         this.leftPressed = false;
-        break;
-      case "ArrowUp":
-        this.upPressed = false;
-        break;
-      case "ArrowDown":
-        this.downPressed = false;
         break;
       case "Space":
         this.spacePressed = false;

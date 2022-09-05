@@ -119,6 +119,7 @@ class Scene {
       ),
       0
     );
+
     const sy = Math.max(
       Math.min(
         window.innerHeight - this.cameraHeight,
@@ -127,7 +128,12 @@ class Scene {
       0
     );
 
-    this.ctx.drawImage(
+    const ctx = this.ctx;
+    const debugMode = this.debug;
+
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    ctx.drawImage(
       this.background,
       sx,
       sy,
@@ -138,8 +144,6 @@ class Scene {
       window.innerWidth,
       window.innerHeight
     );
-    const ctx = this.ctx;
-    const debugMode = this.debug;
 
     this.player.draw(ctx, debugMode);
     this.entities.forEach((ent) => ent.draw(ctx, debugMode));
@@ -153,7 +157,7 @@ class Scene {
 class DevScene extends Scene {
   constructor(canvas, ctx) {
     const bg = Img("BG.png");
-    const player = new Player(null, 50, 50, 700, 50);
+    const player = new Player(null, 50, 5, 700, 600);
     const enemies = [
       new BlueSnail(100, 100, 1),
       new BlueSnail(180, 100, -1),
