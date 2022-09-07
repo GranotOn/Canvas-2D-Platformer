@@ -1,29 +1,30 @@
 import BoundingBox from "./BoundingBox.js";
 import { Logger } from "./logger.js";
 import Shuriken from "./Shuriken.js";
-import mobTypes from "/Configs/entityTypes.js";
-export class Player {
-  constructor(
-    scene = null,
-    velocityX = 50,
-    velocityY = 50,
-    x = 0,
-    y = 0,
-    face = 1
-  ) {
+import jumpState from "../Configs/jumpStates.js";
+import entityTypes from "/Configs/entityTypes.js";
+import gravity from "../Configs/gravity.js";
+
+export default class Player {
+  constructor(scene = null, speed, x = 0, y = 0, face = 1) {
     this.scene = scene;
     this.x = x;
     this.y = y;
-    this.type = mobTypes.player;
-    this.velocityX = velocityX;
-    this.velocityY = velocityY;
+    this.formerY = y;
+    this.type = entityTypes.player;
+    this.jump = jumpState.notJumping;
+    this.jumpSpeed = 5;
+    this.speed = speed;
     this.face = face;
-    this.width = 100;
+    this.width = 80;
     this.boundingColor = "#e41f1f";
-    this.height = 120;
+    this.height = 100;
     this.boundingBox = new BoundingBox(x, y, this.width, this.height);
     this.logger = new Logger("Player");
     this.cooldown = false;
+    this.jumpLimit = 100;
+    this.gravity = gravity;
+    this.gravitySpeed = 0;
   }
 
   setScene(scene) {
@@ -31,8 +32,14 @@ export class Player {
   }
 
   #handleCollisions(collisions) {
-    if (collisions.length > 0) this.boundingColor = "#0000ff";
-    else this.boundingColor = "#ff0000";
+    if (collisions.length === 0) this.jump = jumpState.goingDown;
+    if (collisions.length > 0) {
+      this.boundingColor = "#0000ff";
+
+      // if collides with platforms stop falling
+      collisions.some((collision) => collision.type === entityTypes.platform) &&
+        (this.jump = jumpState.notJumping);
+    } else this.boundingColor = "#ff0000";
   }
 
   #initCooldown(cooldown = 1000) {
@@ -44,7 +51,6 @@ export class Player {
   #emitShuriken() {
     if (this.cooldown === true) return;
     this.#initCooldown();
-
     const enemies = this.scene.getKEnemiesInRange(1, 400, this.face);
 
     var x = this.face === 1 ? this.width + 10 : -15;
@@ -61,9 +67,15 @@ export class Player {
     );
   }
 
+  #handleJump() {
+    if (this.jump === jumpState.notJumping) {
+      this.jump = jumpState.goingUp;
+      this.formerY = this.y;
+    }
+  }
+
   update(delta, collisions = []) {
     this.#handleCollisions(collisions);
-
     var idleFlag = true;
 
     const onNotIdle = () => {
@@ -73,47 +85,54 @@ export class Player {
     };
 
     if (this.rightPressed) {
-      this.x = Math.min(this.x + this.velocityX / delta, window.innerWidth);
+      this.x += this.speed / delta;
+      this.face = 1;
       onNotIdle();
     }
+
     if (this.leftPressed) {
-      this.x = Math.max(this.x - this.velocityX / delta, 0);
+      this.x -= this.speed / delta;
+      this.face = -1;
       onNotIdle();
     }
-    if (this.upPressed) {
-      this.y = Math.max(this.y - this.velocityY / delta, 0);
-      onNotIdle();
+
+    if (this.jump === jumpState.goingUp) {
+      this.gravitySpeed += this.gravity;
+      this.y -= this.jumpSpeed + this.gravitySpeed;
+
+      if (this.y <= this.formerY - this.jumpLimit) {
+        this.jump = jumpState.goingDown;
+      }
     }
-    if (this.downPressed) {
-      this.y = Math.min(this.y + this.velocityY / delta, window.innerHeight);
-      onNotIdle();
+
+    if (this.jump === jumpState.goingDown) {
+      this.gravitySpeed += this.gravity;
+      this.y += this.gravitySpeed;
+    }
+
+    if (this.spacePressed) {
+      this.#handleJump();
     }
 
     if (idleFlag) {
     }
   }
 
-  draw(ctx, isDebug = false) {
+  draw(ctx, offsetX, offsetY, debugMode = false) {
+    const x = this.x + offsetX;
+    const y = this.y + offsetY;
     ctx.lineWidth = 5;
     ctx.strokeStyle = this.boundingColor;
-    ctx.strokeRect(this.x, this.y, this.width, this.height);
+    ctx.strokeRect(x, y, this.width, this.height);
   }
 
-  onKeyDown(e) {
-    switch (e.code) {
+  onKeyDown(code) {
+    switch (code) {
       case "ArrowRight":
         this.rightPressed = true;
-        this.face = 1;
         break;
       case "ArrowLeft":
         this.leftPressed = true;
-        this.face = -1;
-        break;
-      case "ArrowUp":
-        this.upPressed = true;
-        break;
-      case "ArrowDown":
-        this.downPressed = true;
         break;
       case "Space":
         this.spacePressed = true;
@@ -123,19 +142,13 @@ export class Player {
     }
   }
 
-  onKeyUp(e) {
-    switch (e.code) {
+  onKeyUp(code) {
+    switch (code) {
       case "ArrowRight":
         this.rightPressed = false;
         break;
       case "ArrowLeft":
         this.leftPressed = false;
-        break;
-      case "ArrowUp":
-        this.upPressed = false;
-        break;
-      case "ArrowDown":
-        this.downPressed = false;
         break;
       case "Space":
         this.spacePressed = false;

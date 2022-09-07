@@ -1,31 +1,26 @@
 import Img from "./Img.js";
 import { Logger } from "./logger.js";
-import { Player } from "./Player.js";
 import DebugLayer from "./DebugLayer.js";
-import BlueSnail from "./EnemyMobs/BlueSnail/BlueSnail.js";
-import RedSnail from "./EnemyMobs/RedSnail/RedSnail.js";
 import SpriteAnimationManager from "./SpriteAnimation.js";
+import Camera from "./Camera.js";
+
 import { guid } from "./utils.js";
+
 import mobTypes from "/Configs/entityTypes.js";
-class Scene {
-  constructor(
-    canvas,
-    ctx,
-    bg,
-    player,
-    cameraWidth = 600,
-    cameraHeight = 600,
-    debug = false
-  ) {
+
+export default class Scene {
+  constructor(canvas, ctx, player, gameMap, debugMode) {
     this.canvas = canvas;
     this.ctx = ctx;
-    this.background = bg;
+
     this.player = player;
-    this.cameraWidth = cameraWidth;
-    this.cameraHeight = cameraHeight;
-    this.logger = new Logger("Scene.js");
-    this.debug = debug;
     this.entities = [];
+    this.camera = new Camera(canvas);
+    this.camera.follow(player);
+    this.gameMap = gameMap;
+
+    this.logger = new Logger("Scene.js");
+    this.debugMode = debugMode;
     this.debugLayer = new DebugLayer();
     this.spriteMap = new Map();
   }
@@ -35,11 +30,6 @@ class Scene {
     this.#draw(delta);
   }
 
-  onKeyDown(e) {
-    this.player.onKeyDown(e);
-    if (e.code === "F9") this.debug = !this.debug;
-  }
-
   getSpriteAnimation(id, spriteFile, opts) {
     if (!this.spriteMap.has(id)) {
       this.spriteMap.set(id, new Img(spriteFile, "Assets/Sprites/"));
@@ -47,8 +37,13 @@ class Scene {
     return new SpriteAnimationManager(this.spriteMap.get(id), opts);
   }
 
-  onKeyUp(e) {
-    this.player.onKeyUp(e);
+  onKeyDown(code) {
+    this.player.onKeyDown(code);
+    if (code === "F9") this.debug = !this.debug;
+  }
+
+  onKeyUp(code) {
+    this.player.onKeyUp(code);
   }
 
   addEntity(ent) {
@@ -106,66 +101,40 @@ class Scene {
       });
       entity.update(delta, collisions);
     });
+
+    this.camera.update(delta);
   }
 
   #draw(delta) {
-    const playerX = this.player.x;
-    const playerY = this.player.y;
-
-    const sx = Math.max(
-      Math.min(
-        window.innerWidth - this.cameraWidth,
-        playerX + this.cameraWidth / 2
-      ),
-      0
-    );
-    const sy = Math.max(
-      Math.min(
-        window.innerHeight - this.cameraHeight,
-        playerY - this.cameraHeight / 2
-      ),
-      0
-    );
-
-    this.ctx.drawImage(
-      this.background,
-      sx,
-      sy,
-      this.cameraWidth,
-      this.cameraHeight,
-      0,
-      0,
-      window.innerWidth,
-      window.innerHeight
-    );
     const ctx = this.ctx;
-    const debugMode = this.debug;
 
-    this.player.draw(ctx, debugMode);
-    this.entities.forEach((ent) => ent.draw(ctx, debugMode));
+    // clear screen
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    if (debugMode) {
+    // get camera offsets
+    const offsetX = this.camera.x;
+    const offsetY = this.camera.y;
+
+    // draw map
+    this.gameMap.draw(
+      ctx,
+      offsetX,
+      offsetY,
+      this.canvas.width,
+      this.canvas.height
+    );
+
+    // draw entities
+    this.player.draw(ctx, offsetX, offsetY, this.debugMode);
+    this.entities.forEach((ent) =>
+      ent.draw(ctx, offsetX, offsetY, this.debugMode)
+    );
+
+    // draw UI layer
+
+    // draw debug layer
+    if (this.debugMode) {
       this.debugLayer.draw(ctx, this.entities.length, delta, 10, 50);
     }
   }
 }
-
-class DevScene extends Scene {
-  constructor(canvas, ctx) {
-    const bg = Img("BG.png");
-    const player = new Player(null, 50, 50, 700, 50);
-    const enemies = [
-      new BlueSnail(100, 100, 1),
-      new BlueSnail(180, 100, -1),
-      new BlueSnail(250, 100, 1),
-      new RedSnail(250, 200, 1),
-    ];
-    super(canvas, ctx, bg, player, 600, 600, true);
-    enemies.forEach((enemy) => super.addEntity(enemy));
-
-    player.setScene(this);
-    enemies.forEach((enemy) => enemy.setScene(this));
-  }
-}
-
-export { DevScene };
