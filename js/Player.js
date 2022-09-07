@@ -16,9 +16,9 @@ export default class Player {
     this.jumpSpeed = 5;
     this.speed = speed;
     this.face = face;
-    this.width = 100;
+    this.width = 80;
     this.boundingColor = "#e41f1f";
-    this.height = 120;
+    this.height = 100;
     this.boundingBox = new BoundingBox(x, y, this.width, this.height);
     this.logger = new Logger("Player");
     this.cooldown = false;
@@ -32,8 +32,14 @@ export default class Player {
   }
 
   #handleCollisions(collisions) {
-    if (collisions.length > 0) this.boundingColor = "#0000ff";
-    else this.boundingColor = "#ff0000";
+    if (collisions.length === 0) this.jump = jumpState.goingDown;
+    if (collisions.length > 0) {
+      this.boundingColor = "#0000ff";
+
+      // if collides with platforms stop falling
+      collisions.some((collision) => collision.type === entityTypes.platform) &&
+        (this.jump = jumpState.notJumping);
+    } else this.boundingColor = "#ff0000";
   }
 
   #initCooldown(cooldown = 1000) {
@@ -45,7 +51,6 @@ export default class Player {
   #emitShuriken() {
     if (this.cooldown === true) return;
     this.#initCooldown();
-
     const enemies = this.scene.getKEnemiesInRange(1, 400, this.face);
 
     var x = this.face === 1 ? this.width + 10 : -15;
@@ -98,6 +103,11 @@ export default class Player {
       if (this.y <= this.formerY - this.jumpLimit) {
         this.jump = jumpState.goingDown;
       }
+    }
+
+    if (this.jump === jumpState.goingDown) {
+      this.gravitySpeed += this.gravity;
+      this.y += this.gravitySpeed;
     }
 
     if (this.spacePressed) {

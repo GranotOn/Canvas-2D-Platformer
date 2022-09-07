@@ -13,19 +13,19 @@ const Config = {
       x: 40,
       y: 650,
       w: 560,
-      h: 1,
+      h: 3,
     },
     {
       x: 640,
       y: 595,
       w: 140,
-      h: 1,
+      h: 3,
     },
     {
       x: 640,
       y: 715,
       w: 140,
-      h: 1,
+      h: 3,
     },
   ],
 };
@@ -35,7 +35,7 @@ export default class DevScene extends Scene {
     const bg = Img("BG.png");
 
     const gameMap = new GameMap(1500, 2500, bg);
-    const player = new Player(null, 20, 615, 400);
+    const player = new Player(null, 20, 655, 400);
     const enemies = [
       new BlueSnail(100, 600, 1),
       new BlueSnail(180, 600, -1),
