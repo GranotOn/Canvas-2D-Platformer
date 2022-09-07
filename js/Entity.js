@@ -14,14 +14,16 @@ export default class Entity {
 
   update(delta, collisions) {}
 
-  draw(ctx, debugMode, vx, vy) {
-    const dx = this.x - vx;
-    const dy = this.y - vy;
-
+  draw(ctx, offsetX, offsetY, debugMode = false) {
     if (debugMode) {
       ctx.lineWidth = 5;
       ctx.strokeStyle = this.debugColor;
-      ctx.strokeRect(dx, dy, this.width, this.height);
+      ctx.strokeRect(
+        this.x + offsetX,
+        this.y + offsetY,
+        this.width,
+        this.height
+      );
     }
   }
 }

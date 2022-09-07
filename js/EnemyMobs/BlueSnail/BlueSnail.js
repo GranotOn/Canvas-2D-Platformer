@@ -1,16 +1,14 @@
 import BoundingBox from "../../BoundingBox.js";
+import Entity from "../../Entity.js";
 import HitUI from "../../HitUI.js";
 
 import Config from "/Configs/BlueSnail.js";
 import mobTypes from "/Configs/entityTypes.js";
-export default class BlueSnail {
+export default class BlueSnail extends Entity {
   constructor(x, y, face = 1) {
+    super(x, y, Config.spriteOptions.width, Config.spriteOptions.height);
     this.type = mobTypes.enemy;
     this.scene = null;
-    this.x = x;
-    this.y = y;
-    this.width = Config.spriteOptions.width;
-    this.height = Config.spriteOptions.height;
     this.frameTime = Config.spriteOptions.frameTime;
     this.frameTimeDefault = Config.spriteOptions.frameTime;
     this.hp = Config.hp;
@@ -71,9 +69,10 @@ export default class BlueSnail {
     this.id = id;
   }
 
-  draw(ctx, debugMode, vx, vy) {
-    const dx = this.x - vx;
-    const dy = this.y + vy;
+  draw(ctx, offsetX, offsetY, debugMode) {
+    const x = this.x + offsetX;
+    const y = this.y + offsetY;
+
     if (
       this.state === "dead" &&
       this.spriteAnimation.isAnimationOverOnce("dead")
@@ -92,20 +91,16 @@ export default class BlueSnail {
     this.spriteAnimation.drawFrame(
       ctx,
       this.state,
-      dx,
-      dy,
+      x,
+      y,
       frameShouldUpdateFlag,
       this.face
     );
 
     this.hitQueue.forEach((hitObject, idx) =>
-      hitObject.draw(ctx, this.x + this.width / 2)
+      hitObject.draw(ctx, x + this.width / 2)
     );
 
-    if (debugMode) {
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = this.debugColor;
-      ctx.strokeRect(dx, dy, this.width, this.height);
-    }
+    super.draw(ctx, offsetX, offsetY, debugMode);
   }
 }

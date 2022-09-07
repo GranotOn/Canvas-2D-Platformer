@@ -1,5 +1,5 @@
 import { Logger } from "./logger.js";
-import { DevScene } from "./Scene.js";
+import DevScene from "./Scenes/DevScene.js";
 
 class Game {
   constructor() {

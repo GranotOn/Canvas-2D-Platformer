@@ -4,49 +4,30 @@ import DebugLayer from "./DebugLayer.js";
 import SpriteAnimationManager from "./SpriteAnimation.js";
 import Camera from "./Camera.js";
 
-import { Player } from "./Player.js";
-import BlueSnail from "./EnemyMobs/BlueSnail/BlueSnail.js";
-import RedSnail from "./EnemyMobs/RedSnail/RedSnail.js";
-
 import { guid } from "./utils.js";
 
 import mobTypes from "/Configs/entityTypes.js";
-import { Platform } from "./Platform.js";
-class Scene {
-  constructor(
-    canvas,
-    ctx,
-    bg,
-    player,
-    bgWidth,
-    bgHeight,
-    cameraWidth,
-    cameraHeight,
-    debug
-  ) {
+
+export default class Scene {
+  constructor(canvas, ctx, player, gameMap, debugMode) {
     this.canvas = canvas;
     this.ctx = ctx;
-    this.background = bg;
+
     this.player = player;
-    this.logger = new Logger("Scene.js");
-    this.debug = debug;
-    this.camera = new Camera(player.x, player.y, cameraWidth, cameraHeight);
-    this.camera.follow(player);
     this.entities = [];
+    this.camera = new Camera(canvas);
+    this.camera.follow(player);
+    this.gameMap = gameMap;
+
+    this.logger = new Logger("Scene.js");
+    this.debugMode = debugMode;
     this.debugLayer = new DebugLayer();
     this.spriteMap = new Map();
-    this.width = bgWidth;
-    this.height = bgHeight;
   }
 
   onTick(delta) {
     this.#update(delta);
     this.#draw(delta);
-  }
-
-  onKeyDown(e) {
-    this.player.onKeyDown(e);
-    if (e.code === "F9") this.debug = !this.debug;
   }
 
   getSpriteAnimation(id, spriteFile, opts) {
@@ -56,8 +37,13 @@ class Scene {
     return new SpriteAnimationManager(this.spriteMap.get(id), opts);
   }
 
-  onKeyUp(e) {
-    this.player.onKeyUp(e);
+  onKeyDown(code) {
+    this.player.onKeyDown(code);
+    if (code === "F9") this.debug = !this.debug;
+  }
+
+  onKeyUp(code) {
+    this.player.onKeyUp(code);
   }
 
   addEntity(ent) {
@@ -115,61 +101,40 @@ class Scene {
       });
       entity.update(delta, collisions);
     });
+
+    this.camera.update(delta);
   }
 
   #draw(delta) {
-    this.camera.update(delta);
-
     const ctx = this.ctx;
-    const debugMode = this.debug;
 
-    const width = this.camera.width;
-    const height = this.camera.height;
+    // clear screen
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    const cx = this.camera.x;
-    const cy = this.camera.y;
-    2;
+    // get camera offsets
+    const offsetX = this.camera.x;
+    const offsetY = this.camera.y;
 
-    const canvasWidth = this.canvas.width;
-    const canvasHeight = this.canvas.height;
+    // draw map
+    this.gameMap.draw(
+      ctx,
+      offsetX,
+      offsetY,
+      this.canvas.width,
+      this.canvas.height
+    );
 
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    // draw entities
+    this.player.draw(ctx, offsetX, offsetY, this.debugMode);
+    this.entities.forEach((ent) =>
+      ent.draw(ctx, offsetX, offsetY, this.debugMode)
+    );
 
-    ctx.drawImage(this.background, cx, cy);
+    // draw UI layer
 
-    this.player.draw(ctx, debugMode);
-    this.entities.forEach((ent) => ent.draw(ctx, debugMode, cx, cy));
-
-    if (debugMode) {
+    // draw debug layer
+    if (this.debugMode) {
       this.debugLayer.draw(ctx, this.entities.length, delta, 10, 50);
     }
   }
 }
-
-class DevScene extends Scene {
-  constructor(canvas, ctx) {
-    const bg = Img("BG.png");
-    const player = new Player(null, 50, 5, 700, 600);
-    const enemies = [
-      new BlueSnail(100, 100, 1),
-      new BlueSnail(180, 100, -1),
-      new BlueSnail(250, 100, 1),
-      new RedSnail(250, 200, 1),
-    ];
-
-    const bgHeight = bg.naturalHeight;
-    const bgWidth = bg.naturalWidth;
-
-    const platforms = [new Platform(300, 645, 730, 1)];
-
-    super(canvas, ctx, bg, player, bgWidth, bgHeight, 100, 100, true);
-    this.name = "Dev Scene";
-    enemies.forEach((enemy) => super.addEntity(enemy));
-    platforms.forEach((platform) => super.addEntity(platform));
-
-    player.setScene(this);
-    enemies.forEach((enemy) => enemy.setScene(this));
-  }
-}
-
-export { DevScene };

@@ -5,23 +5,16 @@ import jumpState from "../Configs/jumpStates.js";
 import entityTypes from "/Configs/entityTypes.js";
 import gravity from "../Configs/gravity.js";
 
-export class Player {
-  constructor(
-    scene = null,
-    velocityX = 50,
-    velocityY = 5,
-    x = 0,
-    y = 0,
-    face = 1
-  ) {
+export default class Player {
+  constructor(scene = null, speed, x = 0, y = 0, face = 1) {
     this.scene = scene;
     this.x = x;
     this.y = y;
     this.formerY = y;
     this.type = entityTypes.player;
     this.jump = jumpState.notJumping;
-    this.velocityX = velocityX;
-    this.velocityY = velocityY;
+    this.jumpSpeed = 5;
+    this.speed = speed;
     this.face = face;
     this.width = 100;
     this.boundingColor = "#e41f1f";
@@ -87,20 +80,20 @@ export class Player {
     };
 
     if (this.rightPressed) {
-      this.x += this.velocityX / delta;
+      this.x += this.speed / delta;
       this.face = 1;
       onNotIdle();
     }
 
     if (this.leftPressed) {
-      this.x -= this.velocityX / delta;
+      this.x -= this.speed / delta;
       this.face = -1;
       onNotIdle();
     }
 
     if (this.jump === jumpState.goingUp) {
       this.gravitySpeed += this.gravity;
-      this.y -= this.velocityY + this.gravitySpeed;
+      this.y -= this.jumpSpeed + this.gravitySpeed;
 
       if (this.y <= this.formerY - this.jumpLimit) {
         this.jump = jumpState.goingDown;
@@ -115,14 +108,16 @@ export class Player {
     }
   }
 
-  draw(ctx, isDebug = false) {
+  draw(ctx, offsetX, offsetY, debugMode = false) {
+    const x = this.x + offsetX;
+    const y = this.y + offsetY;
     ctx.lineWidth = 5;
     ctx.strokeStyle = this.boundingColor;
-    ctx.strokeRect(this.x, this.y, this.width, this.height);
+    ctx.strokeRect(x, y, this.width, this.height);
   }
 
-  onKeyDown(e) {
-    switch (e.code) {
+  onKeyDown(code) {
+    switch (code) {
       case "ArrowRight":
         this.rightPressed = true;
         break;
@@ -137,8 +132,8 @@ export class Player {
     }
   }
 
-  onKeyUp(e) {
-    switch (e.code) {
+  onKeyUp(code) {
+    switch (code) {
       case "ArrowRight":
         this.rightPressed = false;
         break;

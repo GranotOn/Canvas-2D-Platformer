@@ -72,6 +72,9 @@ export default class RedSnail {
   }
 
   draw(ctx, debugMode) {
+    const x = this.x + offsetX;
+    const y = this.y + offsetY;
+
     if (
       this.state === "dead" &&
       this.spriteAnimation.isAnimationOverOnce("dead")
@@ -90,20 +93,16 @@ export default class RedSnail {
     this.spriteAnimation.drawFrame(
       ctx,
       this.state,
-      this.x,
-      this.y,
+      x,
+      y,
       frameShouldUpdateFlag,
       this.face
     );
 
     this.hitQueue.forEach((hitObject, idx) =>
-      hitObject.draw(ctx, this.x + this.width / 2)
+      hitObject.draw(ctx, x + this.width / 2)
     );
 
-    if (debugMode) {
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = this.debugColor;
-      ctx.strokeRect(this.x, this.y, this.width, this.height);
-    }
+    super(ctx, offsetX, offsetY, debugMode);
   }
 }

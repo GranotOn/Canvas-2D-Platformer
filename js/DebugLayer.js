@@ -9,7 +9,7 @@ export default class DebugLayer {
       `Close Debug: F9`,
     ];
     ctx.font = "30px Arial";
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#000000";
     drawList.forEach((item, i) => {
       ctx.fillText(item, x, sy + 30 * i);
     });

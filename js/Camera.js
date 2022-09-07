@@ -1,23 +1,27 @@
 export default class Camera {
-  constructor(x, y, width, height, lerp = 0.1) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.player = null;
-    this.lerp = lerp;
+  constructor(viewport) {
+    this.x = 0;
+    this.y = 0;
+    this.viewport = viewport;
+    this.lerp = 0.1;
+  }
+  follow(entity) {
+    this.follows = entity;
   }
 
-  #lerp(a, b, delta) {
-    return (a - b) * this.lerp * delta;
+  #lerp(start, end, amt) {
+    return (1 - amt) * start + amt * end;
   }
-
-  follow(player) {
-    this.player = player;
-  }
-
   update(delta) {
-    this.x += this.#lerp(this.player.x, this.x, delta);
-    this.y += this.#lerp(this.player.y, this.y, delta);
+    this.x = this.#lerp(
+      this.x,
+      this.viewport.width / 2 - this.follows.x,
+      this.lerp
+    );
+    this.y = this.#lerp(
+      this.y,
+      this.viewport.height / 2 - this.follows.y,
+      this.lerp
+    );
   }
 }
