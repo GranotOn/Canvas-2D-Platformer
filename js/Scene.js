@@ -1,33 +1,42 @@
 import Img from "./Img.js";
 import { Logger } from "./logger.js";
-import { Player } from "./Player.js";
 import DebugLayer from "./DebugLayer.js";
+import SpriteAnimationManager from "./SpriteAnimation.js";
+import Camera from "./Camera.js";
+
+import { Player } from "./Player.js";
 import BlueSnail from "./EnemyMobs/BlueSnail/BlueSnail.js";
 import RedSnail from "./EnemyMobs/RedSnail/RedSnail.js";
-import SpriteAnimationManager from "./SpriteAnimation.js";
+
 import { guid } from "./utils.js";
+
 import mobTypes from "/Configs/entityTypes.js";
+import { Platform } from "./Platform.js";
 class Scene {
   constructor(
     canvas,
     ctx,
     bg,
     player,
-    cameraWidth = 600,
-    cameraHeight = 600,
-    debug = false
+    bgWidth,
+    bgHeight,
+    cameraWidth,
+    cameraHeight,
+    debug
   ) {
     this.canvas = canvas;
     this.ctx = ctx;
     this.background = bg;
     this.player = player;
-    this.cameraWidth = cameraWidth;
-    this.cameraHeight = cameraHeight;
     this.logger = new Logger("Scene.js");
     this.debug = debug;
+    this.camera = new Camera(player.x, player.y, cameraWidth, cameraHeight);
+    this.camera.follow(player);
     this.entities = [];
     this.debugLayer = new DebugLayer();
     this.spriteMap = new Map();
+    this.width = bgWidth;
+    this.height = bgHeight;
   }
 
   onTick(delta) {
@@ -109,44 +118,27 @@ class Scene {
   }
 
   #draw(delta) {
-    const playerX = this.player.x;
-    const playerY = this.player.y;
-
-    const sx = Math.max(
-      Math.min(
-        window.innerWidth - this.cameraWidth,
-        playerX + this.cameraWidth / 2
-      ),
-      0
-    );
-
-    const sy = Math.max(
-      Math.min(
-        window.innerHeight - this.cameraHeight,
-        playerY - this.cameraHeight / 2
-      ),
-      0
-    );
+    this.camera.update(delta);
 
     const ctx = this.ctx;
     const debugMode = this.debug;
 
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const width = this.camera.width;
+    const height = this.camera.height;
 
-    ctx.drawImage(
-      this.background,
-      sx,
-      sy,
-      this.cameraWidth,
-      this.cameraHeight,
-      0,
-      0,
-      window.innerWidth,
-      window.innerHeight
-    );
+    const cx = this.camera.x;
+    const cy = this.camera.y;
+    2;
+
+    const canvasWidth = this.canvas.width;
+    const canvasHeight = this.canvas.height;
+
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    ctx.drawImage(this.background, cx, cy);
 
     this.player.draw(ctx, debugMode);
-    this.entities.forEach((ent) => ent.draw(ctx, debugMode));
+    this.entities.forEach((ent) => ent.draw(ctx, debugMode, cx, cy));
 
     if (debugMode) {
       this.debugLayer.draw(ctx, this.entities.length, delta, 10, 50);
@@ -164,8 +156,16 @@ class DevScene extends Scene {
       new BlueSnail(250, 100, 1),
       new RedSnail(250, 200, 1),
     ];
-    super(canvas, ctx, bg, player, 600, 600, true);
+
+    const bgHeight = bg.naturalHeight;
+    const bgWidth = bg.naturalWidth;
+
+    const platforms = [new Platform(300, 645, 730, 1)];
+
+    super(canvas, ctx, bg, player, bgWidth, bgHeight, 100, 100, true);
+    this.name = "Dev Scene";
     enemies.forEach((enemy) => super.addEntity(enemy));
+    platforms.forEach((platform) => super.addEntity(platform));
 
     player.setScene(this);
     enemies.forEach((enemy) => enemy.setScene(this));

@@ -2,7 +2,7 @@ import BoundingBox from "./BoundingBox.js";
 import { Logger } from "./logger.js";
 import Shuriken from "./Shuriken.js";
 import jumpState from "../Configs/jumpStates.js";
-import mobTypes from "/Configs/entityTypes.js";
+import entityTypes from "/Configs/entityTypes.js";
 import gravity from "../Configs/gravity.js";
 
 export class Player {
@@ -18,7 +18,7 @@ export class Player {
     this.x = x;
     this.y = y;
     this.formerY = y;
-    this.type = mobTypes.player;
+    this.type = entityTypes.player;
     this.jump = jumpState.notJumping;
     this.velocityX = velocityX;
     this.velocityY = velocityY;
@@ -78,7 +78,6 @@ export class Player {
 
   update(delta, collisions = []) {
     this.#handleCollisions(collisions);
-
     var idleFlag = true;
 
     const onNotIdle = () => {
@@ -88,13 +87,13 @@ export class Player {
     };
 
     if (this.rightPressed) {
-      this.x = Math.min(this.x + this.velocityX / delta, window.innerWidth);
+      this.x += this.velocityX / delta;
       this.face = 1;
       onNotIdle();
     }
 
     if (this.leftPressed) {
-      this.x = Math.max(this.x - this.velocityX / delta, 0);
+      this.x -= this.velocityX / delta;
       this.face = -1;
       onNotIdle();
     }

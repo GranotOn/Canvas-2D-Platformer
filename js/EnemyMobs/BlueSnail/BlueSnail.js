@@ -71,7 +71,9 @@ export default class BlueSnail {
     this.id = id;
   }
 
-  draw(ctx, debugMode) {
+  draw(ctx, debugMode, vx, vy) {
+    const dx = this.x - vx;
+    const dy = this.y + vy;
     if (
       this.state === "dead" &&
       this.spriteAnimation.isAnimationOverOnce("dead")
@@ -90,8 +92,8 @@ export default class BlueSnail {
     this.spriteAnimation.drawFrame(
       ctx,
       this.state,
-      this.x,
-      this.y,
+      dx,
+      dy,
       frameShouldUpdateFlag,
       this.face
     );
@@ -103,7 +105,7 @@ export default class BlueSnail {
     if (debugMode) {
       ctx.lineWidth = 5;
       ctx.strokeStyle = this.debugColor;
-      ctx.strokeRect(this.x, this.y, this.width, this.height);
+      ctx.strokeRect(dx, dy, this.width, this.height);
     }
   }
 }
