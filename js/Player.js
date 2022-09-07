@@ -13,7 +13,8 @@ export default class Player {
     this.formerY = y;
     this.type = entityTypes.player;
     this.jump = jumpState.notJumping;
-    this.jumpSpeed = 5;
+    this.jumpSpeed = 1.5;
+    this.ignoreCollisionsWhenJumping = false;
     this.speed = speed;
     this.face = face;
     this.width = 80;
@@ -32,12 +33,16 @@ export default class Player {
   }
 
   #handleCollisions(collisions) {
-    if (collisions.length === 0) this.jump = jumpState.goingDown;
+    if (collisions.length === 0 && !this.ignoreCollisionsWhenJumping)
+      this.jump = jumpState.goingDown;
     if (collisions.length > 0) {
       this.boundingColor = "#0000ff";
 
       // if collides with platforms stop falling
-      collisions.some((collision) => collision.type === entityTypes.platform) &&
+      !this.ignoreCollisionsWhenJumping &&
+        collisions.some(
+          (collision) => collision.type === entityTypes.platform
+        ) &&
         (this.jump = jumpState.notJumping);
     } else this.boundingColor = "#ff0000";
   }
@@ -69,6 +74,8 @@ export default class Player {
 
   #handleJump() {
     if (this.jump === jumpState.notJumping) {
+      this.gravitySpeed = 0;
+      this.ignoreCollisionsWhenJumping = true;
       this.jump = jumpState.goingUp;
       this.formerY = this.y;
     }
@@ -101,13 +108,15 @@ export default class Player {
       this.y -= this.jumpSpeed + this.gravitySpeed;
 
       if (this.y <= this.formerY - this.jumpLimit) {
-        this.jump = jumpState.goingDown;
+        this.ignoreCollisionsWhenJumping = false;
       }
+      onNotIdle();
     }
 
     if (this.jump === jumpState.goingDown) {
       this.gravitySpeed += this.gravity;
       this.y += this.gravitySpeed;
+      onNotIdle();
     }
 
     if (this.spacePressed) {
