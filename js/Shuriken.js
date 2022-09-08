@@ -1,5 +1,6 @@
 import BoundingBox from "./BoundingBox.js";
 import mobTypes from "/Configs/entityTypes.js";
+
 export default class Shuriken {
   constructor(scene, x, y, face, enemies, damageRange, lifetime = 40) {
     this.type = mobTypes.playerAttack;
@@ -7,7 +8,7 @@ export default class Shuriken {
     this.x = x;
     this.y = y;
     this.face = face;
-    this.speed = 100;
+    this.speed = 20;
     this.width = 10;
     this.height = 10;
     this.enemies = enemies;
@@ -18,6 +19,7 @@ export default class Shuriken {
   }
 
   update(delta, collisions = []) {
+    collisions = collisions.filter((col) => col.type === mobTypes.enemy);
     if (collisions.length > 0 || (this.life < 0 && this.enemies.length === 0)) {
       this.scene.removeEntity(this);
     } else if (this.enemies.length === 0) {
@@ -41,11 +43,16 @@ export default class Shuriken {
     this.id = id;
   }
 
-  draw(ctx, debug) {
-    if (debug) {
+  draw(ctx, offsetX, offsetY, debugMode = false) {
+    if (debugMode) {
       ctx.lineWidth = 5;
       ctx.strokeStyle = "#ff0000";
-      ctx.strokeRect(this.x, this.y, this.width, this.height);
+      ctx.strokeRect(
+        this.x + offsetX,
+        this.y + offsetY,
+        this.width,
+        this.height
+      );
     }
   }
 }

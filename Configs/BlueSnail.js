@@ -5,9 +5,9 @@ const Config = {
   minimumDamageThreshold: 2,
   spriteOptions: {
     spriteFile: "BlueSnailSprite.png",
-    frameTime: 15,
-    width: 53,
-    height: 47,
+    frameTime: 20,
+    width: 48,
+    height: 43,
     states: {
       idle: {
         row: 0,

@@ -39,7 +39,7 @@ export default class Scene {
 
   onKeyDown(code) {
     this.player.onKeyDown(code);
-    if (code === "F9") this.debug = !this.debug;
+    if (code === "F9") this.debugMode = !this.debugMode;
   }
 
   onKeyUp(code) {

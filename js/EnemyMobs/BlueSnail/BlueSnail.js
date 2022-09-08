@@ -34,9 +34,9 @@ export default class BlueSnail extends Entity {
   }
 
   addDamageUI(damage) {
-    const lifeTime = 2000;
-    this.hitQueue.push(new HitUI(damage, this.y - this.hitQueue.length * 30));
-    const dequeueHit = () => this.hitQueue.shift();
+    const lifeTime = 1000;
+    this.hitQueue.push(new HitUI(damage, this.hitQueue.length));
+    const dequeueHit = () => this.hitQueue.shift().remove();
     setTimeout(dequeueHit, lifeTime);
   }
 
@@ -69,6 +69,14 @@ export default class BlueSnail extends Entity {
     this.id = id;
   }
 
+  drawHitQueue(ctx, offsetX, offsetY, debugMode) {
+    this.hitQueue.forEach((hitObject, idx) => {
+      const x = this.x + offsetX + (idx % 2 === 0 ? -3 : 3) + this.width / 2;
+      const y = this.y + offsetY - hitObject.yOrder * 25;
+      hitObject.draw(ctx, x, y, debugMode);
+    });
+  }
+
   draw(ctx, offsetX, offsetY, debugMode) {
     const x = this.x + offsetX;
     const y = this.y + offsetY;
@@ -97,9 +105,7 @@ export default class BlueSnail extends Entity {
       this.face
     );
 
-    this.hitQueue.forEach((hitObject, idx) =>
-      hitObject.draw(ctx, x + this.width / 2)
-    );
+    this.drawHitQueue(ctx, offsetX, offsetY, debugMode);
 
     super.draw(ctx, offsetX, offsetY, debugMode);
   }
