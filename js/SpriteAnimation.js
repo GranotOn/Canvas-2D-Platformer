@@ -1,3 +1,5 @@
+import animationStates from "/Configs/animationStates.js";
+
 class SpriteAnimation {
   constructor({ row, cols }) {
     this.row = row;
@@ -42,7 +44,10 @@ export default class SpriteAnimationManager {
     this.spriteAnimations = new Map();
     this.lastState = null;
     Object.entries(opts.states).forEach((state) => {
-      this.spriteAnimations.set(state[0], new SpriteAnimation(state[1]));
+      this.spriteAnimations.set(
+        animationStates[state[0]],
+        new SpriteAnimation(state[1])
+      );
     });
   }
 
@@ -55,7 +60,6 @@ export default class SpriteAnimationManager {
       this.lastState && this.spriteAnimations.get(this.lastState).reset();
       this.lastState = state;
     }
-
     const width = this.spriteWidth;
     const height = this.spriteHeight;
 

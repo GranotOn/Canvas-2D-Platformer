@@ -14,4 +14,13 @@ export default class BoundingBox {
       this.x > otherBox.x + otherBox.width
     );
   }
+
+  follow(entity) {
+    this.follows = entity;
+  }
+
+  update() {
+    this.x = this.follows.x;
+    this.y = this.follows.y;
+  }
 }

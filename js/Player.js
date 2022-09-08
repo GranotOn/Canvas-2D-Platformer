@@ -21,6 +21,7 @@ export default class Player {
     this.boundingColor = "#e41f1f";
     this.height = 100;
     this.boundingBox = new BoundingBox(x, y, this.width, this.height);
+    this.boundingBox.follow(this);
     this.logger = new Logger("Player");
     this.cooldown = false;
     this.jumpLimit = 100;
@@ -85,22 +86,14 @@ export default class Player {
     this.#handleCollisions(collisions);
     var idleFlag = true;
 
-    const onNotIdle = () => {
-      idleFlag = false;
-      this.boundingBox.x = this.x;
-      this.boundingBox.y = this.y;
-    };
-
     if (this.rightPressed) {
       this.x += this.speed / delta;
       this.face = 1;
-      onNotIdle();
     }
 
     if (this.leftPressed) {
       this.x -= this.speed / delta;
       this.face = -1;
-      onNotIdle();
     }
 
     if (this.jump === jumpState.goingUp) {
@@ -110,21 +103,18 @@ export default class Player {
       if (this.y <= this.formerY - this.jumpLimit) {
         this.ignoreCollisionsWhenJumping = false;
       }
-      onNotIdle();
     }
 
     if (this.jump === jumpState.goingDown) {
       this.gravitySpeed += this.gravity;
       this.y += this.gravitySpeed;
-      onNotIdle();
     }
 
     if (this.spacePressed) {
       this.#handleJump();
     }
 
-    if (idleFlag) {
-    }
+    this.boundingBox.update();
   }
 
   draw(ctx, offsetX, offsetY, debugMode = false) {
