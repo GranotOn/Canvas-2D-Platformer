@@ -1,6 +1,15 @@
-# Generic 2D RPG Side Scroller
+# Canvas 2D Platformer
+<div align="center">
 
-Vision is to have a game reminesence of Maplestory.
+
+![cast](https://user-images.githubusercontent.com/58481800/191430849-eadd249f-8d9a-474a-9a04-30b021878093.gif)
+
+
+</div>
+
+
+This unnamed project is a learning project towards developing a 2D platformer completely in the web.
+The project mimics base MapleStory as an aspiration for ease of comparing systems.
 
 ## Running
 
